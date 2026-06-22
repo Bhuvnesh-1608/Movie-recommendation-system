@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMatch | Full-Stack Movie Hub</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111;
+            color: #fff;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background-color: #1c1c1c;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.7);
+            margin-bottom: 25px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #E50914;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 15px;
+            border-left: 4px solid #E50914;
+            padding-left: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: white;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: 2px solid #E50914;
+        }
+
+        button {
+            padding: 12px 28px;
+            background-color: #E50914;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #b80710;
+        }
+
+        .results-box {
+            background-color: #222;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 50px;
+        }
+
+        .movie-item {
+            background-color: #2d2d2d;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 6px;
+            font-size: 1.05rem;
+            border-left: 3px solid #E50914;
+        }
+
+        .error-text {
+            color: #ff4a4a;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎬 CineMatch Engine</h1>
+        <div class="section-title">Get AI-Powered Movie Recommendations</div>
+        <div class="input-group">
+            <input type="text" id="recInput" placeholder="Enter a movie you love (e.g., Interstellar)...">
+            <button onclick="getRecommendations()">Recommend</button>
+        </div>
+        <div class="results-box" id="recResults">
+            <p style="color: #666; margin: 0;">Recommendations will show up here...</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section-title">Discover Movies via Grouped Filters</div>
+        <div class="input-group">
+            <input type="text" id="genreInput" placeholder="Genre (e.g., Action)">
+            <input type="text" id="actorInput" placeholder="Actor (e.g., Johnny Depp)">
+            <input type="text" id="directorInput" placeholder="Director (e.g., James Cameron)">
+            <button onclick="applyFilters()">Filter</button>
+        </div>
+        <div class="results-box" id="filterResults">
+            <p style="color: #666; margin: 0;">Filtered movie results will show up here...</p>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "http://127.0.0.1:8000";
+
+        async function getRecommendations() {
+            const movieTitle = document.getElementById('recInput').value.trim();
+            const resultsDiv = document.getElementById('recResults');
+
+            if (!movieTitle) {
+                alert("Please enter a movie name first!");
+                return;
+            }
+
+            resultsDiv.innerHTML = "Querying local model vectors...";
+
+            try {
+                const response = await fetch(`${BASE_URL}/recommend?movie=${encodeURIComponent(movieTitle)}`);
+                const result = await response.json();
+                resultsDiv.innerHTML = ""; 
+
+                if (result.status === "success") {
+                    result.data.forEach(title => {
+                        resultsDiv.innerHTML += `<div class="movie-item">🍿 ${title}</div>`;
+                    });
+                } else {
+                    resultsDiv.innerHTML = `<span class="error-text">❌ ${result.message}</span>`;
+                }
+            } catch (err) {
+                resultsDiv.innerHTML = "<span class='error-text'>❌ Connection error! Verify that uvicorn is running in the VS Code terminal.</span>";
+            }
+        }
+
+        async function applyFilters() {
+            let genre = document.getElementById('genreInput').value.trim();
+            let actor = document.getElementById('actorInput').value.trim();
+            let director = document.getElementById('directorInput').value.trim();
+            const resultsDiv = document.getElementById('filterResults');
+
+            if (!genre && !actor && !director) {
+                alert("Please complete at least one filter field!");
+                return;
+            }
+
+            resultsDiv.innerHTML = "Scanning dataset dictionary values...";
+
+            // Clean string formatting to automatically handle user spacing input errors
+            actor = actor.replace(/\s+/g, '');
+            director = director.replace(/\s+/g, '');
+
+            try {
+                const response = await fetch(`${BASE_URL}/filter?genre=${genre}&actor=${actor}&director=${director}`);
+                const result = await response.json();
+                resultsDiv.innerHTML = "";
+
+                if (result.status === "success" && result.data.length > 0) {
+                    result.data.forEach(title => {
+                        resultsDiv.innerHTML += `<div class="movie-item">🎥 ${title}</div>`;
+                    });
+                } else {
+                    resultsDiv.innerHTML = "<p style='color: #888;'>No direct filter matches found. Check your search tokens!</p>";
+                }
+            } catch (err) {
+                resultsDiv.innerHTML = "<span class='error-text'>❌ Connection error! Verify that uvicorn is running in the VS Code terminal.</span>";
+            }
+        }
+    </script>
+</body>
+</html>
