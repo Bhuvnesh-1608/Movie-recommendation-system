@@ -130,7 +130,8 @@
     </div>
 
     <script>
-        const BASE_URL = "http://127.0.0.1:8000";
+        // Production Render Backend API URL
+        const BASE_URL = "https://movie-recommendation-system-bflc.onrender.com";
 
         async function getRecommendations() {
             const movieTitle = document.getElementById('recInput').value.trim();
@@ -141,7 +142,7 @@
                 return;
             }
 
-            resultsDiv.innerHTML = "Querying local model vectors...";
+            resultsDiv.innerHTML = "Querying live model vectors...";
 
             try {
                 const response = await fetch(`${BASE_URL}/recommend?movie=${encodeURIComponent(movieTitle)}`);
@@ -156,7 +157,7 @@
                     resultsDiv.innerHTML = `<span class="error-text">❌ ${result.message}</span>`;
                 }
             } catch (err) {
-                resultsDiv.innerHTML = "<span class='error-text'>❌ Connection error! Verify that uvicorn is running in the VS Code terminal.</span>";
+                resultsDiv.innerHTML = "<span class='error-text'>❌ Connection error! Verify that your Render backend web service is active.</span>";
             }
         }
 
@@ -171,7 +172,7 @@
                 return;
             }
 
-            resultsDiv.innerHTML = "Scanning dataset dictionary values...";
+            resultsDiv.innerHTML = "Scanning dataset values...";
 
             // Clean string formatting to automatically handle user spacing input errors
             actor = actor.replace(/\s+/g, '');
@@ -190,7 +191,7 @@
                     resultsDiv.innerHTML = "<p style='color: #888;'>No direct filter matches found. Check your search tokens!</p>";
                 }
             } catch (err) {
-                resultsDiv.innerHTML = "<span class='error-text'>❌ Connection error! Verify that uvicorn is running in the VS Code terminal.</span>";
+                resultsDiv.innerHTML = "<span class='error-text'>❌ Connection error! Verify that your Render backend web service is active.</span>";
             }
         }
     </script>
