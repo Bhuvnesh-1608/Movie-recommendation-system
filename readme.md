@@ -27,3 +27,19 @@ An AI-powered full-stack web application that delivers real-time movie recommend
 * **Version Control & CI/CD:** Git, GitHub, Git LFS (Large File Storage for ML models)
 
 ## 📂 Project Structure
+```text
+├── datasets/
+│   ├── tmdb_5000_credits.csv   # Raw TMDB credits dataset
+│   └── tmdb_5000_movies.csv    # Raw TMDB movies dataset
+│
+├── .gitattributes              # Git LFS tracking configuration for large files
+├── .gitignore                  # Specifies intentionally untracked files to ignore
+│
+├── index.html                  # Main frontend user interface (HTML/CSS/JS)
+├── main.py                     # FastAPI backend application server
+│
+├── movie_dict.pkl              # Serialized dictionary containing processed movie data
+├── similarity.pkl              # Serialized cosine similarity matrix (ML model)
+│
+├── sol.ipynb                   # Jupyter Notebook for data exploration & model training
+└── README.md                   # Project documentation
